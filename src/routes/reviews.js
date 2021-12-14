@@ -38,12 +38,12 @@ reviewsRouter.route('/:reviewId')
 })
 .put(async (req, res, next) => {
     try {
-        const updateStatement = Object.entries(req.body)
-        .map(([key, value]) => `${key} = '${value}'`)
-        .join(", ")
-        // const updatedAt = moment().format("YYYY-MM-DD hh:mm:ss")
-        const query = `UPDATE review SET ${updateStatement} WHERE review_id = ${req.params.id} RETURNING *`
-        const result = await db.query(query)
+        const valuesInTheBody = Object.values(req.body);
+        const numberOfValues = valuesInTheBody.length;
+        const updateStatement = Object.entries(req.body).map(([key, value], i) => `${key}=$${i + 1}`).join(",")
+        const query = `UPDATE review SET ${updateStatement}, updated_at='${moment().format("YYYY-MM-DD hh:mm:ss")}' 
+                        WHERE review_id=$${numberOfValues + 1} RETURNING *`
+        const result = await db.query(query, [...valuesInTheBody, req.params.reviewId])
         res.send(result.rows[0])
     } catch (error) {
         console.log(error)

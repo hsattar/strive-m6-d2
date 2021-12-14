@@ -38,12 +38,12 @@ productsRouter.route('/:productId')
 })
 .put(async (req, res, next) => {
     try {
-        const updateStatement = Object.entries(req.body)
-        .map(([key, value]) => `${key} = '${value}'`)
-        .join(", ")
-        // const updatedAt = moment().format("YYYY-MM-DD hh:mm:ss")
-        const query = `UPDATE product SET ${updateStatement} WHERE prod_id = ${req.params.id} RETURNING *`
-        const result = await db.query(query)
+        const valuesInTheBody = Object.values(req.body);
+        const numberOfValues = valuesInTheBody.length;
+        const updateStatement = Object.entries(req.body).map(([key, value], i) => `${key}=$${i + 1}`).join(",")
+        const query = `UPDATE product SET ${updateStatement}, updated_at='${moment().format("YYYY-MM-DD hh:mm:ss")}' 
+                        WHERE prod_id=$${numberOfValues + 1} RETURNING *`
+        const result = await db.query(query, [...valuesInTheBody, req.params.productId])
         res.send(result.rows[0])
     } catch (error) {
         console.log(error)
