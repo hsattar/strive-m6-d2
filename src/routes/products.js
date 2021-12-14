@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import db from '../functions/db/connection.js'
+import moment from 'moment'
 
 const productsRouter = Router()
 
@@ -37,14 +38,21 @@ productsRouter.route('/:productId')
 })
 .put(async (req, res, next) => {
     try {
-        res.send('ok')      
+        const updateStatement = Object.entries(req.body)
+        .map(([key, value]) => `${key} = '${value}'`)
+        .join(", ")
+        // const updatedAt = moment().format("YYYY-MM-DD hh:mm:ss")
+        const query = `UPDATE product SET ${updateStatement} WHERE prod_id = ${req.params.id} RETURNING *`
+        const result = await db.query(query)
+        res.send(result.rows[0])
     } catch (error) {
         console.log(error)
     }
 })
 .delete(async (req, res, next) => {
     try {
-        res.send('ok')      
+        const result = await db.query('DELETE FROM product WHERE prod_id = $1', [req.params.productId])
+        res.status(204).send()      
     } catch (error) {
         console.log(error)
     }
