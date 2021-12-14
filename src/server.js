@@ -4,7 +4,7 @@ import productsRouter from './routes/products.js'
 import { testDbConnection } from './functions/db/connection.js'
 
 const server = express()
-const port = process.env.PORT
+const port = process.env.PORT || 3001
 
 server.use(express.json())
 server.use(cors())
