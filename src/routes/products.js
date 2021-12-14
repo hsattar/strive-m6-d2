@@ -6,7 +6,8 @@ const productsRouter = Router()
 productsRouter.route('/')
 .get(async (req, res, next) => {
     try {
-        res.send('ok')      
+        const result = await db.query('SELECT * FROM product')
+        res.send(result.rows)      
     } catch (error) {
         console.log(error)
     }
@@ -27,7 +28,9 @@ productsRouter.route('/')
 productsRouter.route('/:productId')
 .get(async (req, res, next) => {
     try {
-        res.send('ok')      
+        const result = await db.query('SELECT * FROM product WHERE prod_id = $1', [req.params.productId])
+        if (result.rows[0]) return res.send(result.rows[0])      
+        res.status(404).send('A Product with that Id doesn\'t exist')
     } catch (error) {
         console.log(error)
     }
