@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import db from '../functions/db/connection.js'
 
 const productsRouter = Router()
 
@@ -12,9 +13,14 @@ productsRouter.route('/')
 })
 .post(async (req, res, next) => {
     try {
-        res.send('ok')      
+        const { prod_name, prod_description, prod_brand, prod_image, price, prod_category } = req.body
+        const result = await db.query(
+            "INSERT INTO product (prod_name, prod_description, prod_brand, prod_image, price, prod_category) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+            [prod_name, prod_description, prod_brand, prod_image, price, prod_category]
+            )
+        res.status(201).send(result.rows[0])      
     } catch (error) {
-        console.log(error)
+        console.log({error})
     }
 })
 
